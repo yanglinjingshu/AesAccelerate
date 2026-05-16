@@ -1,0 +1,11 @@
+{
+  "name": "opencl-aes-sha256-demo",
+  "version": "1.0.0",
+  "description": "OpenCL accelerated AES-256 and SHA256 demo with Win32 UI",
+  "dependencies": [
+    {
+      "name": "opencl",
+      "version>=": "2023.04.15"
+    }
+  ]
+}

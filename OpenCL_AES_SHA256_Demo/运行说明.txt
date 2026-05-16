@@ -1,0 +1,162 @@
+================================================================================
+    OpenCL AES-256 & SHA-256 Demo - 运行说明
+================================================================================
+
+一、环境要求
+------------------------------------------------
+- Windows 10 / 11（64位）
+- Visual Studio 2022（或 VS 2019）
+- vcpkg 2023.04.15 或更高版本
+- 支持 OpenCL 的 GPU 驱动（NVIDIA/AMD/Intel），或无 GPU 也可使用 CPU 模式
+
+
+二、vcpkg 安装与配置
+------------------------------------------------
+
+1. 安装 vcpkg（如已安装可跳过）：
+   git clone https://github.com/Microsoft/vcpkg.git
+   cd vcpkg
+   .\bootstrap-vcpkg.bat
+
+2. 设置环境变量 VCPKG_ROOT 指向 vcpkg 目录，或直接在 vcpkg 目录下执行后续命令。
+
+3. 安装 OpenCL 依赖：
+   vcpkg install opencl --triplet x64-windows
+
+4. （重要）集成 vcpkg 到 Visual Studio：
+   vcpkg integrate install
+
+   执行成功后显示 "Applied user-wide integration for this vcpkg root." 即完成。
+
+
+三、工程导入与编译
+------------------------------------------------
+
+1. 用 Visual Studio 2022 打开根目录下的 OpenCL_AES_SHA256_Demo.sln
+
+2. 确保解决方案配置为 "Release" + "x64"（或 "Debug" + "x64"）
+
+3. 按 F7 或菜单 "生成 -> 生成解决方案" 进行编译
+
+4. 编译成功后，可执行文件位于：
+   x64\Release\OpenCL_AES_SHA256_Demo.exe
+
+5. 运行前确认 AES256Kernel.cl 和 SHA256Kernel.cl 文件在 exe 同目录下。
+   （项目已配置自动复制 .cl 文件到输出目录）
+
+
+四、演示步骤
+------------------------------------------------
+
+1. 运行程序后，等待 OpenCL 设备检测完成：
+   - 状态栏显示 GPU 设备名称和计算单元数
+   - 如果未检测到 GPU，会弹出提示并自动使用 CPU 模式
+   - GPU 按钮在初始化失败时自动禁用
+
+2. AES-256 加密演示（GPU）：
+   a. 在 "AES Plaintext/Ciphertext" 输入框中输入任意文本
+   b. 确认 "AES Key" 输入框中的密钥（默认已填入32位示例密钥，
+      不足32位自动补'0'，超出自动截断）
+   c. 点击 "AES Encrypt (GPU)" 按钮
+   d. 加密结果以十六进制显示在 "AES Result" 中
+   e. 性能对比数据（GPU vs CPU 耗时、加速比）显示在下方
+
+3. AES-256 解密演示（GPU）：
+   a. 将步骤2中得到的十六进制密文粘贴到 AES 输入框
+   b. 使用相同的密钥
+   c. 点击 "AES Decrypt (GPU)" 按钮
+   d. 解密结果（原文）显示在 "AES Result" 中
+
+4. SHA-256 哈希演示（GPU）：
+   a. 在 "SHA-256 Input Text" 输入框中输入任意文本
+   b. 点击 "SHA256 Hash (GPU)" 按钮
+   c. 64位十六进制哈希值显示在 "SHA-256 Hash Result" 中
+   d. GPU 将并行计算 262,144 次哈希以展示加速效果
+   e. 性能对比数据显示在下方的 "Performance Comparison" 区域
+
+5. CPU 对比演示：
+   a. 点击 "AES Encrypt (CPU)" 或 "SHA256 Hash (CPU)" 按钮
+   b. 可对比查看纯 CPU 计算的耗时
+   c. GPU 结果已自动与 CPU 结果校验，一致则显示 "YES"
+
+6. 加速效果验证：
+   - 输入数据量越大，GPU 加速效果越明显
+   - 建议 AES 输入 1KB 以上文本以获得明显加速
+   - SHA-256 GPU 加速通过并行处理大量独立哈希实现
+
+
+五、工程文件结构
+------------------------------------------------
+
+OpenCL_AES_SHA256_Demo/
+├── OpenCL_AES_SHA256_Demo.h       主窗口头文件、控件ID定义
+├── OpenCL_AES_SHA256_Demo.cpp     Win32窗口创建、事件处理、消息循环
+├── OpenCLManager.h                OpenCL资源管理类头文件
+├── OpenCLManager.cpp              OpenCL初始化、内存管理、内核编译
+├── AES256.h                       AES-256算法头文件
+├── AES256.cpp                     AES-256 CPU/GPU实现
+├── SHA256.h                       SHA-256算法头文件
+├── SHA256.cpp                     SHA-256 CPU/GPU实现
+├── AES256Kernel.cl                AES-256 OpenCL内核代码
+├── SHA256Kernel.cl                SHA-256 OpenCL内核代码
+├── vcpkg.json                     vcpkg 依赖配置
+├── OpenCL_AES_SHA256_Demo.vcxproj VS项目文件
+
+
+六、常见问题解决
+------------------------------------------------
+
+Q1: vcpkg 安装依赖失败
+A1: 确保 vcpkg 版本 >= 2023.04.15，执行：
+    git pull && .\bootstrap-vcpkg.bat
+    然后重新执行 vcpkg install opencl --triplet x64-windows
+
+Q2: 编译时找不到 CL/cl.h
+A2: 确认已执行 vcpkg integrate install，并在 VS 中重新打开解决方案。
+    如果问题持续，检查 vcpkg 是否已安装 opencl 包：
+    vcpkg list | findstr opencl
+
+Q3: 运行时提示找不到 OpenCL.dll
+A3: 确保 GPU 驱动已安装（NVIDIA/AMD/Intel 官方最新驱动）。
+    也可安装 OpenCL 运行时：vcpkg install opencl --triplet x64-windows
+
+Q4: GPU 未检测到，只能使用 CPU
+A4: 确认系统已安装 GPU 驱动。Intel 集成显卡需要安装 Intel OpenCL 驱动。
+    NVIDIA GPU 需要安装 NVIDIA 显卡驱动（自带 OpenCL）。
+    AMD GPU 需要安装 AMD 显卡驱动（自带 OpenCL）。
+
+Q5: GPU 与 CPU 结果不一致
+A5: 正常情况下结果应一致。如果出现不一致，请检查：
+    - GPU 驱动是否为最新版本
+    - 密钥是否输入正确（32字节）
+    - 解密时输入是否为有效的十六进制密文
+
+Q6: 编译失败（字符集问题）
+A6: 项目已配置为"使用多字节字符集"，如仍有问题请检查：
+    项目属性 -> 配置属性 -> 高级 -> 字符集 -> 使用多字节字符集
+
+Q7: Win32 窗口显示异常
+A7: 确保编译为 x64 平台。字体问题可忽略，核心功能不受影响。
+
+Q8: 程序启动时闪退
+A8: 以命令行方式运行查看错误信息：
+    cd x64\Release
+    OpenCL_AES_SHA256_Demo.exe
+
+
+七、技术要点说明
+------------------------------------------------
+
+1. OpenCL 初始化：自动检测系统 GPU 设备，兼容 NVIDIA/AMD/Intel。
+   无 GPU 时自动降级为 CPU 模式。
+
+2. AES-256 ECB 模式：每个 16 字节块独立加密/解密，
+   各 work-item 并行处理，GPU 加速效果显著。
+
+3. SHA-256 GPU 加速：通过并行处理大量独立哈希实现加速，
+   每个 work-item 处理一个独立的哈希计算。
+
+4. 性能计时：采用 std::chrono::high_resolution_clock，
+   计时包含 GPU 数据传输时间，反映真实使用场景的性能。
+
+5. 结果校验：GPU 运算结果自动与 CPU 结果比对，确保正确性。

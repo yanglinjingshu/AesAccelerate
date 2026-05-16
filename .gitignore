@@ -1,0 +1,55 @@
+# Build outputs
+x64/
+Debug/
+Release/
+*/Debug/
+*/Release/
+*.exe
+*.dll
+*.lib
+*.ilk
+*.pdb
+*.exp
+*.iobj
+*.ipdb
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+*.tlog
+*.db
+*.opendb
+.vscode/
+
+# vcpkg
+vcpkg_installed/
+vcpkg/
+
+# Object and intermediate files
+*.obj
+*.o
+*.res
+*.bsc
+*.sbr
+*.aps
+*.idb
+*.ncb
+*.pch
+
+# Generated source (if any)
+*.generated.*
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Backup and temp
+*.bak
+*.tmp
+*.log
